@@ -1,0 +1,49 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify tag is on main
+        run: |
+          if ! git branch -r --contains "${{ github.sha }}" | grep -qE 'origin/main$'; then
+            echo "::error::Release tags must point to a commit on the main branch."
+            exit 1
+          fi
+
+      - name: Create release zip
+        run: |
+          mkdir release
+          cp src/installer.ps1 release/
+          cp src/uninstaller.ps1 release/
+          cp src/LockTimeoutController.ps1 release/
+          cp src/RunHidden.vbs release/
+          cp README.md release/
+          cp LICENSE release/
+          cd release
+          zip -r ../Turn-off-screen-on-lock-${{ github.ref_name }}.zip .
+
+      - name: Generate checksums
+        run: sha256sum Turn-off-screen-on-lock-${{ github.ref_name }}.zip src/install.ps1 > checksums-sha256.txt
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@153bb8e04406b158c6c84fc1615b65b24149a1fe # v2.6.1
+        with:
+          files: |
+            Turn-off-screen-on-lock-${{ github.ref_name }}.zip
+            checksums-sha256.txt
+            src/install.ps1
+          generate_release_notes: true

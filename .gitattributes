@@ -1,0 +1,6 @@
+# Exclude development/documentation files from archive downloads
+.gitignore export-ignore
+.gitattributes export-ignore
+spec.md export-ignore
+threat-model.md export-ignore
+CHANGELOG.md export-ignore
