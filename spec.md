@@ -92,7 +92,7 @@ uninstaller.ps1
 
 | Action | Reads | Writes | Changes VIDEOCONLOCK |
 |---|---|---|---|
-| `OnLock` | -- | `state.json` | no |
+| `OnLock` | `config.json` | `state.json` | yes, baseline |
 | `OnUnlock` | `config.json` | `state.json` | yes, baseline |
 | `PromoteOnWake` | `state.json`, `config.json` | -- | yes, wake (if locked) |
 
@@ -101,7 +101,7 @@ Write directions for the three JSON files:
 | File | Written by | Read by |
 |---|---|---|
 | `state.json` | `OnLock`, `OnUnlock`, installer | `PromoteOnWake` |
-| `config.json` | installer (defaults only) | `OnUnlock`, `PromoteOnWake`, installer |
+| `config.json` | installer (defaults only) | `OnLock`, `OnUnlock`, `PromoteOnWake`, installer |
 | `baseline.json` | installer (once, on first install) | uninstaller |
 
 ---
@@ -157,11 +157,14 @@ wscript.exe "<install-folder>\RunHidden.vbs" OnLock
 
 1. Generates a new GUID for this lock cycle.
 2. Writes `state.json`: `status = "locked"`, `generation = <new GUID>`, `lastActionUtc = <now>`.
-3. Leaves `VIDEOCONLOCK` unchanged.
+3. Reads `config.json` for the baseline timeout.
+4. Sets `VIDEOCONLOCK` AC and DC to the baseline timeout. Reapplies the active power scheme.
+
+Setting `VIDEOCONLOCK` at lock time forces Windows to re-arm its internal display-off countdown from the moment of lock, preventing stale idle time accumulated before the lock event from causing the screen to turn off earlier than configured.
 
 ### 4. Display turns off
 
-`VIDEOCONLOCK` is still at the baseline (default 1 second), so Windows turns the display off shortly after lock.
+Windows turns the display off after the baseline timeout (default 1 second) has elapsed since the lock event.
 
 ### 5. System enters Modern Standby
 
@@ -257,7 +260,7 @@ All three share the same principal and settings listed here. Per-task sections b
 
 #### Purpose
 
-Marks the start of a new lock cycle. Updates `state.json` with a fresh generation ID and `locked` status. Leaves `VIDEOCONLOCK` untouched.
+Marks the start of a new lock cycle. Updates `state.json` with a fresh generation ID and `locked` status. Re-applies `VIDEOCONLOCK` to the baseline timeout to re-arm Windows's display-off countdown from the moment of lock.
 
 #### Trigger
 
@@ -658,6 +661,31 @@ The workflow runs on GitHub Actions when a `v*` tag is pushed.
 | `install.ps1` | Bootstrap installer, downloadable standalone |
 
 ---
+
+## Useful commands
+
+### Last lock / screen-off / wake / unlock (Admin PowerShell)
+
+#### Command
+```powershell
+$lock   = Get-WinEvent -FilterHashtable @{LogName='Security'; Id=4800} -MaxEvents 1
+$unlock = Get-WinEvent -FilterHashtable @{LogName='Security'; Id=4801} -MaxEvents 1
+$enter_modern_standby    = Get-WinEvent -ProviderName 'Microsoft-Windows-Kernel-Power' -FilterXPath '*[System[EventID=506]]' -MaxEvents 1
+$exit_modern_standby   = Get-WinEvent -ProviderName 'Microsoft-Windows-Kernel-Power' -FilterXPath '*[System[EventID=507]]' -MaxEvents 1
+
+'{0,-28} {1:yyyy-MM-dd HH:mm:ss}' -f 'Last Lock',                 $lock.TimeCreated
+'{0,-28} {1:yyyy-MM-dd HH:mm:ss}' -f 'Last Enter Modern Standby',  $enter_modern_standby.TimeCreated
+'{0,-28} {1:yyyy-MM-dd HH:mm:ss}' -f 'Last Exit Modern Standby',   $exit_modern_standby.TimeCreated
+'{0,-28} {1:yyyy-MM-dd HH:mm:ss}' -f 'Last Unlock',               $unlock.TimeCreated
+```
+#### Example output
+```
+Last Lock                    2026-04-05 06:06:40
+Last Enter Modern Standby    2026-04-05 06:06:56
+Last Exit Modern Standby     2026-04-05 06:07:03
+Last Unlock                  2026-04-05 06:07:12
+```
+
 
 ## Notes
 
