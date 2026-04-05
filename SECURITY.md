@@ -3,8 +3,9 @@
 ## Supported Versions
 
 | Version | Supported          | Security Acceptance |
-| :-------: | :----------------: | :------------: |
-| 1.0.0 (current)   | ✅ | [threat-model-v1.0.0.md](threat-model-v1.0.0.md) |
+| :------- | :----------------: | :------------: |
+| 1.0.0   | ✅ | [threat-model-v1.0.0.md](Archive/threat-model-v1.0.0.md) |
+| 1.0.1 (current)   | ✅ | [threat-model-v1.0.1.md](threat-model-v1.0.1.md)  |
 |   |  |  |
 
 
