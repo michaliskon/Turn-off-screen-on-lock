@@ -1,3 +1,5 @@
+*.zip
+checksums-sha256.txt
+.claude/
 state.json
 settings.json
-.claude/

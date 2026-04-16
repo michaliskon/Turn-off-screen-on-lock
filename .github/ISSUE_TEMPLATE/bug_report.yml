@@ -1,0 +1,82 @@
+name: Bug report
+description: Report a reproducible problem with the tool.
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug. Please fill out the sections below.
+        If you discovered a security vulnerability, do NOT use this form — see SECURITY.md.
+
+  - type: input
+    id: version
+    attributes:
+      label: Project version
+      description: The version you installed (from CHANGELOG.md or the release tag).
+      placeholder: "e.g., v1.0.0"
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Minimal, numbered steps to trigger the bug.
+      placeholder: |
+        1. Run `.\installer.ps1` from an elevated PowerShell
+        2. ...
+        3. ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What should have happened?
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: What actually happened? Include error messages verbatim.
+    validations:
+      required: true
+
+  - type: input
+    id: windows-version
+    attributes:
+      label: Windows version
+      description: Run `winver` to find this.
+      placeholder: "e.g., Windows 11 Pro 23H2 (Build 22631.xxxx)"
+    validations:
+      required: true
+
+  - type: input
+    id: powershell-version
+    attributes:
+      label: PowerShell version
+      description: Run `$PSVersionTable.PSVersion` to find this.
+      placeholder: "e.g., 5.1.22621.xxxx"
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs or console output
+      description: Any stderr/stdout from the installer, uninstaller, or controller. Paste verbatim.
+      render: shell
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional context
+      description: Anything else we should know (domain-joined machine, Group Policy, non-standard config, etc.).
+    validations:
+      required: false
