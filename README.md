@@ -116,7 +116,7 @@ In case you want to uninstall:
 
 The security and reliability profiles chosen for this project are targeting personal use on trusted home machines.
 
-Enterprise and public device usage have been included in the security review, which concluded that additional hardening is strongly recommended in such cases - see [threat-model-v1.0.0.md](threat-model-v1.0.0.md) for the related risks.
+Enterprise and public device usage have been included in the security review, which concluded that additional hardening is strongly recommended in such cases - see [threat-model-v1.0.1.md](threat-model-v1.0.1.md) for the related risks.
 
 
 ## Documentation

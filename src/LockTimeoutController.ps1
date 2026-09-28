@@ -123,6 +123,8 @@ try {
         'OnLock' {
             $newGeneration = [guid]::NewGuid().Guid
             Save-State -State (New-State -Status 'locked' -GenerationValue $newGeneration)
+            $config = Get-Config
+            Set-VideoConLock -Seconds $config.baselineTimeoutSeconds
         }
 
         'OnUnlock' {
