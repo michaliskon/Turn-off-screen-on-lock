@@ -1,3 +1,5 @@
 state.json
 settings.json
 .claude/
+/logs/wake-trace/
+/temporary-test-runs/wake-trace/

@@ -1,3 +1,5 @@
+# Handles scheduled lock, unlock, and wake actions, applying the configured timeout
+# and retaining the latest controller failure without running a background service.
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $true)]
@@ -8,9 +10,6 @@ param(
 $ErrorActionPreference = 'Stop'
 
 $DataDir = Join-Path $env:LOCALAPPDATA 'Turn-off-screen-on-lock'
-if (-not (Test-Path -LiteralPath $DataDir)) {
-    New-Item -ItemType Directory -Path $DataDir -Force | Out-Null
-}
 $StatePath = Join-Path $DataDir 'state.json'
 
 function Save-State {
@@ -119,6 +118,10 @@ function New-State {
 }
 
 try {
+    if (-not (Test-Path -LiteralPath $DataDir)) {
+        New-Item -ItemType Directory -Path $DataDir -Force | Out-Null
+    }
+
     switch ($Action) {
         'OnLock' {
             $newGeneration = [guid]::NewGuid().Guid
@@ -152,5 +155,19 @@ try {
     }
 }
 catch {
-    throw
+    $controller_error = $_
+    try {
+        # Keep only the latest failure, with a bounded message and no stack trace.
+        $error_message = $controller_error.Exception.Message
+        if ($error_message.Length -gt 4096) {
+            $error_message = $error_message.Substring(0, 4096) + ' [truncated]'
+        }
+        $log_entry = '{0} Action={1}{2}{3}' -f (Get-Date).ToUniversalTime().ToString('o'), $Action, [Environment]::NewLine, $error_message
+        Set-Content -LiteralPath (Join-Path $DataDir 'last-error.log') -Value $log_entry -Encoding UTF8
+    }
+    catch {
+        # A full disk or inaccessible data folder must not hide the original failure.
+        Write-Warning -Message 'Unable to write last-error.log; the original controller error is preserved.' -WarningAction Continue
+    }
+    throw $controller_error
 }
