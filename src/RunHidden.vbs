@@ -6,7 +6,7 @@
 
 If WScript.Arguments.Count = 0 Then WScript.Quit 1
 
-Dim fso, scriptDir, action, cmd
+Dim fso, scriptDir, action, cmd, exit_code
 Set fso = CreateObject("Scripting.FileSystemObject")
 scriptDir = fso.GetParentFolderName(WScript.ScriptFullName)
 
@@ -28,4 +28,6 @@ End Select
 
 cmd = "powershell.exe -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File """ & scriptDir & "\LockTimeoutController.ps1"" -Action """ & action & """"
 
-CreateObject("WScript.Shell").Run cmd, 0, False
+' Keep the window hidden and report the controller result to Task Scheduler.
+exit_code = CreateObject("WScript.Shell").Run(cmd, 0, True)
+WScript.Quit exit_code

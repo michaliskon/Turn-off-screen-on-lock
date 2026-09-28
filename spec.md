@@ -335,9 +335,9 @@ Thin launcher, no real logic:
    ```text
    powershell.exe -ExecutionPolicy Bypass -NoProfile -WindowStyle Hidden -File "<own-folder>\LockTimeoutController.ps1" -Action <arg>
    ```
-4. Exits with PowerShell's exit code.
+4. Waits for PowerShell to finish, keeping the window hidden, and exits with PowerShell's exit code.
 
-No logging. No argument validation beyond forwarding.
+The launcher does not log. It checks that the controller exists and allows only `OnLock`, `OnUnlock`, and `PromoteOnWake`.
 
 
 ---
@@ -572,7 +572,7 @@ Each `powercfg` call must check `$LASTEXITCODE` and throw on failure.
 
 Malformed state: fail safely, do not guess and promote blindly. `powercfg` failure (non-zero exit code): throw immediately.
 
-Errors go to stderr. No log file, no Event Log. Tasks run hidden so errors are effectively silent, but stderr is available when running the controller manually for debugging.
+Runtime errors go to stderr and terminate the controller with a non-zero exit code, which the hidden launcher returns to Task Scheduler. The controller saves the latest failure in `%LOCALAPPDATA%\Turn-off-screen-on-lock\last-error.log`, including the UTC time, action, and failure message. The message is limited to 4096 characters, with a truncation marker when needed. Each failure replaces the previous log entry; successful actions leave the log intact. If logging fails, the controller emits a warning and preserves the original error. No Event Log entry is written.
 
 ### Configuration
 

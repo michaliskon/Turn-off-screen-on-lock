@@ -99,6 +99,18 @@ Both values must be integers between 1 and 86400 (24 hours).
 The config file is created automatically during installation. Changes take effect on the next lock, unlock, or wake event -- no reinstall needed.
 
 
+## Troubleshooting
+
+Scheduled tasks report the controller's exit code. If an action fails, the latest error is saved in:
+
+```text
+%LOCALAPPDATA%\Turn-off-screen-on-lock\last-error.log
+```
+
+The log includes the UTC time, action, and failure message. It keeps only the latest failure, with the message limited to 4096 characters. Successful actions leave it intact, so check the timestamp. If the log cannot be written, the task still reports the original failure.
+
+For a screen that wakes again while locked, use the optional [20-minute wake recorder](maintainer-tools/wake-trace/README.md). Its launcher requests administrator permission, saves device and power diagnostics, and lets Windows stop the recording automatically after 20 minutes.
+
 ## Uninstall
 In case you want to uninstall:
 
